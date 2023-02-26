@@ -1,0 +1,14 @@
+services:
+    gchernikov_request_resolver.request_resolver:
+        class: GChernikov\RequestResolverBundle\ArgumentResolver\RequestResolver\RequestResolver
+        arguments:
+            $validator: '@validator'
+            $supportedRequests: []  # <--- Replaced by CompilerPath
+            $nameConverter: '@serializer.name_converter.camel_case_to_snake_case'
+
+    gchernikov_request_resolver.argument_resolver:
+        class: GChernikov\RequestResolverBundle\ArgumentResolver\RequestArgumentResolver
+        arguments:
+            $requestResolver: '@gchernikov_request_resolver.request_resolver'
+        tags:
+            - controller.argument_value_resolver
