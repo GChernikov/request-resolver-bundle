@@ -201,7 +201,7 @@ class PrepareRequestsCompilerPass implements CompilerPassInterface
     }
 
     /**
-     * @return array<Parameter>
+     * @return array<Parameter>F
      */
     private function getParameterAttributeInstances(
         ReflectionClass|ReflectionMethod $methodOrClass,

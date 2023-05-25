@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace GChernikov\RequestResolverBundle\ArgumentResolver;
 
 use GChernikov\RequestResolverBundle\ArgumentResolver\RequestResolver\RequestResolver;
-use GChernikov\RequestResolverBundle\Contract\OperationRequestInterface;
 use ReflectionException;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Controller\ValueResolverInterface;
@@ -28,7 +27,7 @@ final class RequestArgumentResolver implements ValueResolverInterface
             $argument->getType() === null
             || $argument->isVariadic()
             || !class_exists($argument->getType())
-            || !is_subclass_of($argument->getType(), OperationRequestInterface::class)
+            || !$this->requestResolver->supports($argument->getType())
         ) {
             return [];
         }

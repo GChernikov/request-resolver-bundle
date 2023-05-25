@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace GChernikov\RequestResolverBundle\ArgumentResolver\RequestResolver;
 
-use GChernikov\RequestResolverBundle\Contract\OperationRequestInterface;
 use ReflectionClass;
 use ReflectionException;
 use ReflectionProperty;
@@ -14,7 +13,6 @@ use Symfony\Component\Validator\ConstraintViolationList;
 use Symfony\Component\Validator\Exception\ValidationFailedException;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Throwable;
-use Webmozart\Assert\InvalidArgumentException;
 
 /**
  * @template T
@@ -38,12 +36,15 @@ final class RequestResolver
     ) {
     }
 
+    public function supports(string $className): bool
+    {
+        return isset($this->supportedRequests[$className]);
+    }
+
     /**
      * @throws ReflectionException
-     * @throws InvalidArgumentException
      * @throws ValidationFailedException
      *
-     * @template TRequest of OperationRequestInterface
      * @psalm-param class-string<TRequest> $requestClassName
      *
      * @return TRequest
@@ -83,10 +84,12 @@ final class RequestResolver
 
         $this->removeDuplicateMessages($violations);
 
-        $violations->count() && throw new ValidationFailedException(
-            value: $requestDto,
-            violations: $violations,
-        );
+        if ($violations->count()) {
+            throw new ValidationFailedException(
+                value: $requestDto,
+                violations: $violations,
+            );
+        }
 
         return $requestDto;
     }
@@ -159,13 +162,13 @@ final class RequestResolver
         $parameters = [];
 
         foreach ($properties as $propertyName) {
-            $name = $this->nameConverter->normalize($propertyName);
+            $snakePropertyName = $this->nameConverter->normalize($propertyName);
 
-            $parameters[$propertyName] = match ($mapping[$name] ?? null) {
-                'path' => $request->attributes->get($name),
-                'query' => $request->query->get($name),
-                'header' => $request->headers->get($name),
-                default => $parametersBag[$name] ?? null,
+            $parameters[$propertyName] = match ($mapping[$propertyName] ?? null) {
+                'path' => $request->attributes->get($propertyName) ?? $request->attributes->get($snakePropertyName),
+                'query' => $request->query->get($propertyName) ?? $request->query->get($snakePropertyName),
+                'header' => $request->headers->get($propertyName) ?? $request->headers->get($snakePropertyName),
+                default => $parametersBag[$propertyName] ?? $parametersBag[$snakePropertyName] ?? null,
             };
         }
 
