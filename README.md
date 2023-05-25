@@ -86,6 +86,9 @@ final class CreateOrderRequest
     #[NotBlank]
     #[GreaterThanOrEqual(1)]
     public int $quantity;
+    
+    #[NotBlank]
+    public int $productId
 }
 
 ```
