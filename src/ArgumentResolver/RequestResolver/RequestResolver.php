@@ -67,6 +67,13 @@ final class RequestResolver
             $value = $parameters[$name];
 
             try {
+                if (
+                    $value !== null
+                    && ltrim((string) $reflectionProperty->getType(), '?') === 'bool'
+                ) {
+                    $value = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+                }
+
                 $reflectionProperty->setValue($requestDto, $value);
                 $valueToValidate = $reflectionProperty->getValue($requestDto);
             } catch (Throwable) {
